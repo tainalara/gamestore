@@ -23,55 +23,54 @@ import com.generation.gamestore.repository.ProdutosRepository;
 
 import jakarta.validation.Valid;
 
-@RestController //Mostra ao Spring que essa Classe é uma Controller
-@RequestMapping("/produtos")//Define qual endpoint desta Classe
-@CrossOrigin (origins = "*", allowedHeaders = "*") //Permite consumir a API 
+@RestController // Mostra ao Spring que essa Classe é uma Controller
+@RequestMapping("/produtos") // Define qual endpoint desta Classe
+@CrossOrigin(origins = "*", allowedHeaders = "*") // Permite consumir a API
 public class ProdutosController {
-	
-	@Autowired //Injeção de Dependência
+
+	@Autowired // Injeção de Dependência
 	private ProdutosRepository produtosRepository;
-	
-	@PostMapping //Método para cadastrar Produtos
+
+	@PostMapping // Método para cadastrar Produtos
 	public ResponseEntity<Produtos> post(@Valid @RequestBody Produtos produtos) {
 		// Salva a postagem no banco e retorna status 201 (Created)
 		return ResponseEntity.status(HttpStatus.CREATED).body(produtosRepository.save(produtos));
 	}
-	
+
 	@GetMapping // Listar todas os Produtos Cadastradas
-	public ResponseEntity<List<Produtos>> getAll(){
+	public ResponseEntity<List<Produtos>> getAll() {
 		return ResponseEntity.ok(produtosRepository.findAll());
 	}
-	
-	@GetMapping("/{id}") //Mostrar Categoria por Id específica
-	public ResponseEntity<Produtos> getById(@PathVariable Long id){
-	    return produtosRepository.findById(id)
-	            .map(resposta -> ResponseEntity.ok(resposta))
-	            .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-	 }
-	 
-	@GetMapping("/produtos/{nome}") //Mostrar pesquisa por nome
-	public ResponseEntity<List<Produtos>> getByTipo(@PathVariable String nome) {
-		return ResponseEntity.ok(produtosRepository.findAllByNomeContainingIgnoreCase(nome));
-		}
-	 
-	@PutMapping
-	public ResponseEntity<Produtos> put(@Valid @RequestBody Produtos produtos)  {
-		return produtosRepository.findById(produtos.getId())
-				.map( resposta -> ResponseEntity.status(HttpStatus.OK)
-					.body (produtosRepository.save(produtos)))
+
+	@GetMapping("/{id}") // Mostrar Categoria por Id específica
+	public ResponseEntity<Produtos> getById(@PathVariable Long id) {
+		return produtosRepository.findById(id).map(resposta -> ResponseEntity.ok(resposta))
 				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
 	}
-	
+
+	@GetMapping("/nome/{nome}") // Mostrar pesquisa por nome
+	public ResponseEntity<List<Produtos>> getByTipo(@PathVariable String nome) {
+		return ResponseEntity.ok(produtosRepository.findAllByNomeContainingIgnoreCase(nome));
+	}
+
+	@PutMapping("/{id}")
+	public ResponseEntity<Produtos> put(@PathVariable Long id, @Valid @RequestBody Produtos produtos) {
+		return produtosRepository.findById(id).map(resposta -> {
+			// Garante que o ID do corpo seja consistente com o ID da URL
+			produtos.setId(id);
+			return ResponseEntity.status(HttpStatus.OK).body(produtosRepository.save(produtos));
+		}).orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+	}
+
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@DeleteMapping("/{id}")
 	public void delete(@PathVariable Long id) {
-		Optional<Produtos> Produtos = produtosRepository.findById(id);
-		
-		if(Produtos.isEmpty())
+		Optional<Produtos> produto = produtosRepository.findById(id);
+
+		if (produto.isEmpty())
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-		
-	produtosRepository.deleteById(id);
+
+		produtosRepository.deleteById(id);
 	}
-	
+
 }
-	

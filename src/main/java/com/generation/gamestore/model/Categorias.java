@@ -2,8 +2,6 @@ package com.generation.gamestore.model;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -31,7 +29,6 @@ public class Categorias {
 	private String descricao_tipo;
 	
 	@OneToMany (fetch = FetchType.LAZY, mappedBy = "categorias", cascade = CascadeType.REMOVE)// Mostra a Relação de Uma para Muitas
-	@JsonIgnoreProperties("categorias")
 	private List<Produtos> produtos;
 
 	public Long getId() {
